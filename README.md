@@ -15,6 +15,7 @@ The script automatically fetches all DNSBL lists configured in your PMG (from th
 - Installer with cron and logrotate configuration
 
 ## Installation
+
 1. Clone the repository:
    ```sh
    git clone https://github.com/<your-user>/pmg-dnsbl-monitor.git
@@ -22,22 +23,22 @@ The script automatically fetches all DNSBL lists configured in your PMG (from th
    ```
 2. Make the script executable:
    ```sh
-   chmod +x pmg-dnsbl-check.sh
+   chmod +x pmg-dnsbl-monitor.sh
    ```
 3. Run the installer as root:
    ```sh
-   sudo ./pmg-dnsbl-check.sh --install
+   sudo ./pmg-dnsbl-monitor.sh --install
    ```
 
 ## Usage
 - Manual check:
-  ```sh
-  ./pmg-dnsbl-check.sh --run
-  ```
+   ```sh
+   ./pmg-dnsbl-monitor.sh --run
+   ```
 - Installation and configuration:
-  ```sh
-  sudo ./pmg-dnsbl-check.sh --install
-  ```
+   ```sh
+   sudo ./pmg-dnsbl-monitor.sh --install
+   ```
 
 ## Requirements
 - Proxmox Mail Gateway

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ------------------------------------------------------------------------------
-# Name:         pmg_dnsbl_monitor.sh
+# Name:         pmg-dnsbl-monitor.sh
 # Description:  Tests and monitors the health of DNSBL lists configured in PMG.
 # Author:       Łukasz Ryszkeiwicz
 # GitHub:       https://github.com/pmg-tools/pmg-dnsbl-monitor
