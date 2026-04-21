@@ -19,6 +19,18 @@ CRON_TAG="# PMG-DNSBL-MONITOR-JOB"
 SCRIPT_PATH=$(realpath "$0")
 
 
+
+# --- FUNCTION: LOGGING ---
+log_msg() {
+    local FACILITY="$1"
+    local MESSAGE="$2"
+    local TS
+    TS=$(date '+%Y-%m-%d %H:%M:%S')
+    local SCRIPT_NAME
+    SCRIPT_NAME=$(basename "$0" .sh)
+    echo "$TS [$SCRIPT_NAME] [$FACILITY] $MESSAGE" >> "${LOG_PATH_CONFIG:-$DEFAULT_LOG}"
+}
+
 # --- FUNCTION: SHOW USAGE ---
 show_usage() {
     echo "Usage: $0 {--install|--run}"
@@ -31,13 +43,9 @@ show_usage() {
 
 # --- FUNCTION: MONITORING (RUN MODE) ---
 run_monitor() {
-    # Determine which log file to use
-    LOG_FILE="${LOG_PATH_CONFIG:-$DEFAULT_LOG}"
-    
     # Check if required tools are available
     if ! command -v postconf &> /dev/null; then
-        TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-        echo "$TIMESTAMP [SYSTEM] ERROR: postconf not found. Check PATH configuration." >> "$LOG_FILE"
+        log_msg "ERROR" "[SYSTEM] postconf not found. Check PATH configuration."
         exit 1
     fi
 
@@ -46,8 +54,7 @@ run_monitor() {
 
     # Validate if any DNSBL sites are configured
     if [ -z "$(echo $RAW_LIST | tr -d '[:space:]')" ]; then
-        TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-        echo "$TIMESTAMP [SYSTEM] ERROR: No DNSBL sites configured in PMG." >> "$LOG_FILE"
+        log_msg "ERROR" "[SYSTEM] No DNSBL sites configured in PMG."
         exit 1
     fi
 
@@ -55,14 +62,13 @@ run_monitor() {
     for ENTRY in $RAW_LIST; do
         # Extract domain name and strip weights (e.g., zen.spamhaus.org*2 -> zen.spamhaus.org)
         DOMAIN=$(echo $ENTRY | cut -d'*' -f1)
-        TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-        
+
         # Perform DNS lookup for the test record 127.0.0.2 (reversed as 2.0.0.127)
         RESULTS=$(host -W 2 -t A 2.0.0.127.$DOMAIN 2>/dev/null | grep "has address" | awk '{print $NF}')
 
         # Handle cases where the DNSBL provider does not respond
         if [ -z "$RESULTS" ]; then
-            echo "$TIMESTAMP [$DOMAIN] Status: ERROR - No response (NXDOMAIN/Timeout)" >> "$LOG_FILE"
+            log_msg "ERROR" "[$DOMAIN] Status: No response (NXDOMAIN/Timeout)"
             continue
         fi
 
@@ -84,24 +90,25 @@ run_monitor() {
 
         # Log the final status based on prioritized evaluation
         if [ "$IS_OK" = true ]; then
-            echo "$TIMESTAMP [$DOMAIN] Status: OK" >> "$LOG_FILE"
+            log_msg "INFO" "[$DOMAIN] Status: OK"
         elif [ "$IS_LIMIT" = true ]; then
-            echo "$TIMESTAMP [$DOMAIN] Status: ERROR - Query limit exceeded (127.255.255.254)" >> "$LOG_FILE"
+            log_msg "ERROR" "[$DOMAIN] Status: Query limit exceeded (127.255.255.254)"
         elif [ "$IS_BLOCKED" = true ]; then
-            echo "$TIMESTAMP [$DOMAIN] Status: ERROR - Open Resolver Blocked (127.255.255.252)" >> "$LOG_FILE"
+            log_msg "ERROR" "[$DOMAIN] Status: Open Resolver Blocked (127.255.255.252)"
         else
-            echo "$TIMESTAMP [$DOMAIN] Status: ERROR - Unexpected result: $OTHER_ERR" >> "$LOG_FILE"
+            log_msg "ERROR" "[$DOMAIN] Status: Unexpected result: $OTHER_ERR"
         fi
     done
 }
 
 # --- FUNCTION: INSTALLATION (INSTALL MODE) ---
 run_install() {
-    # Ensure the script is run as root
-    if [[ $EUID -ne 0 ]]; then
-       echo "Błąd: Ten skrypt musi być uruchomiony z uprawnieniami roota!"
-       exit 1
-    fi
+
+     # Ensure the script is run as root
+     if [[ $EUID -ne 0 ]]; then
+         echo "Błąd: Ten skrypt musi być uruchomiony z uprawnieniami roota!"
+         exit 1
+     fi
 
     echo "--- PMG DNSBL Monitor: Instalator ---"
 
