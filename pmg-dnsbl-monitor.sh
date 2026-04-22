@@ -135,7 +135,7 @@ run_install() {
 
     # Generate logrotate configuration to prevent disk exhaustion
     echo "Tworzenie konfiguracji logrotate..."
-    cat << EOF > /etc/logrotate.d/pmg-dnsbl-test
+    cat << EOF > /etc/logrotate.d/pmg-dnsbl-monitor
 $USER_LOG {
     weekly
     rotate 4
