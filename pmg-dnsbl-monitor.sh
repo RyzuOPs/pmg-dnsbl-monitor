@@ -14,7 +14,7 @@ PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # --- INTERNAL CONFIGURATION (Modified by installer) ---
 LOG_PATH_CONFIG=""
-DEFAULT_LOG="/var/log/pmg-dnsbl-test.log"
+DEFAULT_LOG="/var/log/pmg-dnsbl-monitor.log"
 CRON_TAG="# PMG-DNSBL-MONITOR-JOB"
 SCRIPT_PATH=$(realpath "$0")
 
@@ -159,9 +159,10 @@ EOF
 
     echo "------------------------------------------------"
     echo "Instalacja zakończona sukcesem!"
-    echo "Autor: Łukasz Ryszkeiwicz"
-    echo "Log: $USER_LOG"
-    echo "Interwał: co $USER_HOURS godz."
+    echo "Skrypt zainstalowany: $SCRIPT_PATH"
+    echo "Logowanie do pliku: $USER_LOG"
+    echo "Zadanie dodane do crona (co $USER_HOURS godz.)"
+    echo "Dokumentacja: https://github.com/RyzuOPs/pmg-dnsbl-monitor"
     echo "------------------------------------------------"
 }
 
